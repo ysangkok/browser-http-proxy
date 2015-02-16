@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset='utf-8'>
+<script src="node_modules/utf-8/node_modules/string.fromcodepoint/fromcodepoint.js"></script>
+<script src="node_modules/utf-8/node_modules/string.prototype.codepointat/codepointat.js"></script>
+<script src="build.js"></script>
+<script>
+var UTF8 = require("utf-8");
+var work = require('webworkify');
+
+var w = work(require('http-server'));
+w.addEventListener('message', function (ev) {
+	console.log(ev.data);
+	//w.terminate();
+});
+
+w.postMessage(new Uint8Array(UTF8.setBytesFromString("GET /1 HTTP/1.0\r\n\r\n")));
+w.postMessage(new Uint8Array(UTF8.setBytesFromString("GET /2 HTTP/0.0")));
+w.postMessage(new Uint8Array(UTF8.setBytesFromString("GET /3 HTTP/1.0\r\n\r\n")));
+</script>

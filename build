@@ -1,0 +1,2 @@
+#!/bin/sh -ex
+browserify -r node_modules/utf-8:utf-8 -r ./chromify/dtrace.js:dtrace -r node_modules/webworkify:webworkify -r ./http-server.js:http-server -r ./ReadWriteNetStream.js:ReadWriteNetStream -r ./chromify/builtins/net.js:net -r ./chromify/builtins/http.js:http -r ./chromify/builtins/__chromify_freelist.js:freelist -o build.js

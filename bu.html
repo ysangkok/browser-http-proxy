@@ -1,0 +1,44 @@
+<!doctype html>
+<meta charset='utf-8'>
+<script src="build.js"></script>
+<script>
+var http = require("http");
+var server = http.createServer(function (req, res) {
+	console.log(req);
+	res.writeHead(200, {'Content-Type': 'text/plain'});
+	res.end('okay');
+});
+var ReadWriteNetStream = require("ReadWriteNetStream");
+var dummySocket = new ReadWriteNetStream();
+dummySocket.on("connect", function() {
+	console.log("client connected");
+});
+dummySocket.on("data", function(data) {
+	console.log("client data: " + data);
+})
+server.emit("connection", dummySocket);
+//dummySocket.write("GET /loldongs HTTP/1.0\r\n\r\n");
+//dummySocket.emit("data","GET /loldongs HTTP/1.0\r\n\r\n");
+//dummySocket.ondata("GET /loldongs HTTP/1.0\r\n\r\n");
+var i=0;
+var send = function(str) {
+	dummySocket.ondata(str, i, i+str.length);
+	i += str.length;
+}.bind(this);
+
+function utf8AbFromStr(str) {
+    var strUtf8 = unescape(encodeURIComponent(str));
+    var ab = new Uint8Array(strUtf8.length);
+    for (var i = 0; i < strUtf8.length; i++) {
+        ab[i] = strUtf8.charCodeAt(i);
+    }
+    return ab;
+}
+
+function strFromUtf8Ab(ab) {
+    return decodeURIComponent(escape(String.fromCharCode.apply(null, ab)));
+}
+
+send(utf8AbFromStr("GET /loldongs HTTP/1.0\r\n\r\n"));
+server.close();
+</script>
