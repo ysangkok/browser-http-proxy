@@ -1,0 +1,91 @@
+<!doctype html>
+<title>Browser HTTP Proxy</title>
+
+<script src="../v86/build/libv86.js"></script>
+<script src="build.js"></script>
+<script>
+"use strict";
+var work = require('webworkify');
+
+var w = work(require('http-server'));
+
+window.onload = function()
+{
+    window.emulator = new V86Starter({
+//                id: "archlinux",
+//                state: {
+//                    "url": "v86state.bin",
+//                    "size": 69283634,
+//                },
+//                name: "Arch Linux",
+
+//                async_hda: {
+//                    "url": "https://dl.dropboxusercontent.com/u/61029208/arch3.img",
+//                    "size": 8 * 1024 * 1024 * 1024,
+//                },
+
+//                filesystem: {
+//                    "basefs": "fs.json",
+//                    "baseurl": "http://104.131.53.7:8086/arch/",
+//                },
+        memory_size: 32 * 1024 * 1024,
+        vga_memory_size: 2 * 1024 * 1024,
+        cdrom: {
+            url: "../v86/images/ttylinux-pc_i486-2015.01.iso",
+        },
+        network_relay_url: "ws://relay.widgetry.org:80",
+
+        bios: {
+            url: "../v86/bios/seabios.bin",
+        },
+        vga_bios: {
+            url: "../v86/bios/vgabios.bin",
+        },
+        screen_container: document.getElementById("screen_container"),
+	//boot_order: 0x213,
+//        cdrom: {
+//            url: "../v86/images/linux.iso",
+//        },
+	autostart: true
+    });
+
+document.getElementById("send").onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+            emulator.serial0_send(xhr.responseText);
+        }
+    }
+    xhr.open('GET', 'tcp-serial-bridge/squashfs.uuencode', true);
+    xhr.send(null);
+};
+document.getElementById("setup").onclick = function() {
+var buf = "";
+
+emulator.add_listener("serial0-output-char", function(char) {
+    buf += char;
+    if (buf.slice(-1) === "\n") {
+        console.log("post req");
+        var parsed = JSON.parse(buf); //parse with \n but it parses anyway...
+        buf = "";
+        w.postMessage(parsed);
+    }
+});
+
+w.addEventListener('message', function (ev) {
+    if (ev.data) {
+        emulator.serial0_send(JSON.stringify(ev.data) + "\n");
+    }
+});
+};
+
+}
+</script>
+<button id="setup">set up proxy</button>
+<button id="send">send over serial port</button>
+
+<!-- A minimal structure for the ScreenAdapter defined in browser/screen.js -->
+<div id="screen_container">
+    <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+    <canvas style="display: none"></canvas>
+</div>

@@ -1,0 +1,3 @@
+[submodule "chromify"]
+	path = chromify
+	url = git@github.com:ysangkok/chromify.git

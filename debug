@@ -1,12 +1,16 @@
 #!/bin/sh -ex
-if [ ! -e node_modules/utf-8 ]; then
-	npm install utf-8
-if
+if [ ! -e node_modules/utf8-encoding ]; then
+	npm install utf8-encoding
+fi
 if [ ! -e node_modules/webworkify ]; then
 	npm install webworkify
-if
+fi
+if [ ! -e node_modules/envify ]; then
+	npm install envify
+fi
 if [ ! -e chromify ]; then
 	git clone git@github.com:ysangkok/chromify.git
-if
+fi
 
-browserify -d -r node_modules/utf-8:utf-8 -r ./chromify/dtrace.js:dtrace -r node_modules/webworkify:webworkify -r ./http-server.js:http-server -r ./ReadWriteNetStream.js:ReadWriteNetStream -r ./chromify/builtins/net.js:net -r ./chromify/builtins/http.js:http -r ./chromify/builtins/__chromify_freelist.js:freelist -t [ envify --NODE_DEBUG http,timer,net ] -o build.js
+#needs update according to build
+#browserify -d -r node_modules/utf-8:utf-8 -r ./chromify/dtrace.js:dtrace -r node_modules/webworkify:webworkify -r ./http-server.js:http-server -r ./ReadWriteNetStream.js:ReadWriteNetStream -r ./chromify/builtins/net.js:net -r ./chromify/builtins/http.js:http -r ./chromify/builtins/__chromify_freelist.js:freelist -t [ envify --NODE_DEBUG http,timer,net ] -o build.js
