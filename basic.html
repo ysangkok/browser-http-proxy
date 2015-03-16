@@ -2,6 +2,53 @@
 <title>Browser HTTP Proxy</title>
 
 <script src="../v86/build/libv86.js"></script>
+<!--
+<script src="http://copy.sh/v86/build/libv86.js"></script>
+-->
+<!--
+<script>
+//<![CDATA[
+// load all files to run v86 in browser, uncompiled
+
+(function()
+{
+    var CORE_FILES = "const.js io.js main.js lib.js ide.js fpu.js pci.js floppy.js " +
+                     "memory.js dma.js pit.js vga.js ps2.js pic.js rtc.js uart.js acpi.js hpet.js " +
+                     "ne2k.js state.js virtio.js bus.js log.js";
+    var BROWSER_FILES = "main.js screen.js keyboard.js mouse.js serial.js lib.js network.js starter.js";
+    var LIB_FILES = "esprima.js walk.js";
+
+    // jor1k stuff
+    LIB_FILES += " jor1k.js 9p.js filesystem.js marshall.js utf8.js";
+
+    load_scripts("cpu.js", "../v86/build/");
+    load_scripts(CORE_FILES, "../v86/src/");
+    load_scripts(BROWSER_FILES, "../v86/src/browser/");
+    load_scripts(LIB_FILES, "../v86/lib/");
+
+    function load_scripts(resp, path)
+    {
+        var files = resp.split(" "),
+            script;
+
+        for(var i = 0; i < files.length; i++)
+        {
+            // this may be a bad idea, if someone tries to 
+            // load this script after the document has loaded,
+            // but it's necessary to ensure that scripts are 
+            // loaded in order
+            document.write('<script src="' + path + files[i] + '"></script>');
+
+            //script = document.createElement("script");
+            //script.src = PATH + files[i] + "?" + Math.random();
+            //script.defer = "defer";
+            //document.body.appendChild(script);
+        }
+    }
+})();
+//]]>
+</script>
+-->
 <script src="build.js"></script>
 <script>
 "use strict";
@@ -23,16 +70,19 @@ window.onload = function()
 //                    "url": "https://dl.dropboxusercontent.com/u/61029208/arch3.img",
 //                    "size": 8 * 1024 * 1024 * 1024,
 //                },
+cdrom: {"url": "../v86/images/9pboot.iso"},
+//hda: {"url": "../v86/images/FDSTD10.IMG"},
+//fda: {"url": "../v86/images/bootgrub"},
 
-//                filesystem: {
-//                    "basefs": "fs.json",
-//                    "baseurl": "http://104.131.53.7:8086/arch/",
-//                },
+                filesystem: {
+                    "basefs": "../v86/docs/samples/fs.json",
+                    "baseurl": "../v86/fsroot/",
+                },
         memory_size: 32 * 1024 * 1024,
         vga_memory_size: 2 * 1024 * 1024,
-        cdrom: {
-            url: "../v86/images/ttylinux-pc_i486-2015.01.iso",
-        },
+//        cdrom: {
+//            url: "../v86/images/ttylinux-pc_i486-2015.01.iso",
+//        },
         network_relay_url: "ws://relay.widgetry.org:80",
 
         bios: {
@@ -41,7 +91,7 @@ window.onload = function()
         vga_bios: {
             url: "../v86/bios/vgabios.bin",
         },
-        screen_container: document.getElementById("screen_container"),
+        screen_container: document.getElementById("screen_container"), serial_container: document.getElementById("serial"),
 	//boot_order: 0x213,
 //        cdrom: {
 //            url: "../v86/images/linux.iso",
@@ -58,6 +108,11 @@ document.getElementById("send").onclick = function() {
     }
     xhr.open('GET', 'tcp-serial-bridge/squashfs.uuencode', true);
     xhr.send(null);
+};
+document.getElementById("pause").onclick = function() {
+	this.notpaused = !this.notpaused;
+	if (this.notpaused) emulator.stop();
+	else emulator.run();
 };
 document.getElementById("setup").onclick = function() {
 var buf = "";
@@ -79,13 +134,31 @@ w.addEventListener('message', function (ev) {
 });
 };
 
+document.getElementById("file").onchange = function(evt) {
+    for (var i = 0, f; f = evt.target.files[i]; i++) {
+    	(function(f){
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            emulator.create_file(f.name, new Uint8Array(reader.result));
+        }.bind(this);
+        reader.readAsArrayBuffer(f);
+    	})(f);
+    }
+};
+
 }
 </script>
+<button id="pause">pause</button>
 <button id="setup">set up proxy</button>
 <button id="send">send over serial port</button>
+<input type="file" id="file" multiple />
 
 <!-- A minimal structure for the ScreenAdapter defined in browser/screen.js -->
 <div id="screen_container">
-    <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+    <div style="white-space: pre; font: 14px monospace"></div>
     <canvas style="display: none"></canvas>
 </div>
+<textarea cols="40" rows="12" id="serial">This is the serial console. Whatever you type or paste here will be send to COM1.
+
+In Linux it can be accessed with `cat /dev/ttyS0`
+</textarea>
