@@ -3,6 +3,7 @@
 
 <script src="../v86/build/libv86.js"></script>
 <!--
+<script src="../v86/build/libv86-working-with-host9p.js"></script>
 <script src="http://copy.sh/v86/build/libv86.js"></script>
 -->
 <!--
@@ -75,8 +76,8 @@ cdrom: {"url": "../v86/images/9pboot.iso"},
 //fda: {"url": "../v86/images/bootgrub"},
 
                 filesystem: {
-                    "basefs": "../v86/docs/samples/fs.json",
-                    "baseurl": "../v86/fsroot/",
+                    "basefs": "fs.json",
+                    "baseurl": "../v86/",
                 },
         memory_size: 32 * 1024 * 1024,
         vga_memory_size: 2 * 1024 * 1024,
