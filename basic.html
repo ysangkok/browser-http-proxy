@@ -137,13 +137,13 @@ w.addEventListener('message', function (ev) {
 
 document.getElementById("file").onchange = function(evt) {
     for (var i = 0, f; f = evt.target.files[i]; i++) {
-    	(function(f){
+	(function(f){
         var reader = new FileReader();
         reader.onload = function(e) {
             emulator.create_file(f.name, new Uint8Array(reader.result));
         }.bind(this);
         reader.readAsArrayBuffer(f);
-    	})(f);
+	})(f);
     }
 };
 
