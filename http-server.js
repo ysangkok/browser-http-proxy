@@ -1,6 +1,7 @@
 
 var UTF8 = require("utf8-encoding");
 var encoder = new UTF8.TextEncoder();
+var decoder = new UTF8.TextDecoder();
 var http = require("http");
 var ReadWriteNetStream = require("ReadWriteNetStream");
 
@@ -9,9 +10,21 @@ module.exports = function (self) {
 		res.on("close", function() { console.log("ServerResponse evt close"); });
 		res.on("finish", function() { console.log("ServerResponse evt finish"); self.postMessage({Done: true, Data: ""}); });
 		for (var evt of ['response', 'socket', 'connect', 'upgrade', 'continue']) req.on(evt, function(evt) { return function() { console.log("ClientRequest evt " + evt); }; }(evt) );
-		res.writeHead(200, {'Content-Type': 'text/plain'});
-		res.write("hello client! here's the url:");
-		res.end(req.url);
+
+		var xhr = new XMLHttpRequest();
+		xhr.open(req.method, req.url, false);
+		if (typeof Uint8Array != 'undefined') xhr.responseType = "arraybuffer";
+		try {
+			xhr.send(null);
+		} catch (e) {
+			res.writeHead(403, {"Content-Type": "text/plain"});
+			res.end(e.message);
+		}
+		if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304)) throw new Error("Couldn't load " + url + ". Status: " + xhr.status);
+		if (xhr.response === undefined) throw new Error("Response undefined");
+
+		res.writeHead(xhr.status, {"Content-Type": xhr.getResponseHeader("Content-Type")});
+		res.end(decoder.decode(new Uint8Array(xhr.response || [])));
 	});
 
 	for (var evt of ['request', 'connection', 'close', 'checkContinue', 'connect', 'upgrade', 'clientError'])
