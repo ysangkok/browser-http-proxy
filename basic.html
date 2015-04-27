@@ -3,12 +3,8 @@
 
 <script src="../v86/build/libv86.js"></script>
 <!--
-<script src="../v86/build/libv86-working-with-host9p.js"></script>
 <script src="http://copy.sh/v86/build/libv86.js"></script>
--->
-<!--
 <script>
-//<![CDATA[
 // load all files to run v86 in browser, uncompiled
 
 (function()
@@ -38,7 +34,7 @@
             // load this script after the document has loaded,
             // but it's necessary to ensure that scripts are 
             // loaded in order
-            document.write('<script src="' + path + files[i] + '"></script>');
+            document.write('<script src="' + path + files[i] + '"></sc' + 'ript>');
 
             //script = document.createElement("script");
             //script.src = PATH + files[i] + "?" + Math.random();
@@ -47,7 +43,6 @@
         }
     }
 })();
-//]]>
 </script>
 -->
 <script src="build.js"></script>
@@ -79,7 +74,7 @@ cdrom: {"url": "../v86/images/9pboot.iso"},
                     "basefs": "fs.json",
                     "baseurl": "./fsroot/",
                 },
-        memory_size: 32 * 1024 * 1024,
+        memory_size: 64 * 1024 * 1024,
         vga_memory_size: 2 * 1024 * 1024,
 //        cdrom: {
 //            url: "../v86/images/ttylinux-pc_i486-2015.01.iso",
