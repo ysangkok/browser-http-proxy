@@ -1,0 +1,47 @@
+<!doctype html>
+<title>Test browser HTTP Proxy</title>
+<script src="build.js"></script>
+<script>
+"use strict";
+var work = require('webworkify');
+
+var w = work(require('http-server'));
+
+var fauxJax = require('faux-jax');
+fauxJax.install();
+
+var buf = "";
+
+window.handle_char = function(char) {
+    buf += char;
+    if (buf.slice(-1) === "\n") {
+        console.log("post req");
+        var parsed = JSON.parse(buf); //parse with \n but it parses anyway...
+        buf = "";
+        w.postMessage(parsed);
+    }
+};
+
+w.addEventListener('message', function (ev) {
+    if (ev.data) {
+        if (ev.data != '{"zup": "bro?"}') throw new Error("test failed");
+    } else {
+        console.log("test succeeds");
+    }
+});
+
+function respond(request) {
+  request.respond(
+    200, {
+      'Content-Type': 'application/json'
+    },
+    '{"zup": "bro?"}' //body
+  );
+
+  fauxJax.restore();
+}
+
+fauxJax.on('request', respond);
+
+handle_char(JSON.stringify({New:true,Data:btoa("GET http://ip.tyk.nu HTTP/1.0\r\n\r\n")})+"\n");
+</script>

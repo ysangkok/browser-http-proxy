@@ -37,6 +37,7 @@ module.exports = function (self) {
 	});
 
 	self.addEventListener('message',function (ev) {
+		if (typeof(ev.data.New) === "undefined") throw new Error("invalid message posted to http-server!");
 		if (ev.data.New) {
 			self.i=0;
 			self.dummySocket = new ReadWriteNetStream();
