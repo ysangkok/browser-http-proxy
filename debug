@@ -2,18 +2,8 @@
 if [ ! -e node_modules/utf8-encoding ]; then
 	npm install utf8-encoding
 fi
-if [ ! -e node_modules/webworkify ]; then
-	npm install webworkify
-fi
 if [ ! -e node_modules/envify ]; then
 	npm install envify
-fi
-if [ ! -e node_modules/phantomxhr ]; then
-	npm install phantomxhr
-fi
-if [ ! -e n1k0-casperjs-4f105a9 ]; then
-	wget https://github.com/n1k0/casperjs/zipball/1.1-beta3
-	unzip 1.1-beta3
 fi
 if [ ! -e chromify ]; then
 	git clone git@github.com:ysangkok/chromify.git

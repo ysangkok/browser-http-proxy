@@ -1,2 +1,2 @@
 #!/bin/sh -ex
-browserify -r node_modules/utf8-encoding:utf8-encoding -r ./chromify/dtrace.js:dtrace -r node_modules/webworkify:webworkify -r ./http-server.js:http-server -r ./ReadWriteNetStream.js:ReadWriteNetStream -r ./chromify/builtins/net.js:net -r ./chromify/builtins/http.js:http -r ./chromify/builtins/__chromify_freelist.js:freelist -o build.js
+browserify -r node_modules/utf8-encoding:utf8-encoding -r ./chromify/dtrace.js:dtrace -r node_modules/faux-jax:faux-jax -r ./http-server.js:http-server -r ./ReadWriteNetStream.js:ReadWriteNetStream -r ./chromify/builtins/net.js:net -r ./chromify/builtins/http.js:http -r ./chromify/builtins/__chromify_freelist.js:freelist -o build.js

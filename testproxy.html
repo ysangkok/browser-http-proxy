@@ -3,12 +3,7 @@
 <script src="build.js"></script>
 <script>
 "use strict";
-var work = require('webworkify');
-
-var w = work(require('http-server'));
-
-var fauxJax = require('faux-jax');
-fauxJax.install();
+var httpserver = require('http-server');
 
 var buf = "";
 
@@ -18,30 +13,16 @@ window.handle_char = function(char) {
         console.log("post req");
         var parsed = JSON.parse(buf); //parse with \n but it parses anyway...
         buf = "";
-        w.postMessage(parsed);
+        httpserver.postMessage(parsed);
     }
 };
 
-w.addEventListener('message', function (ev) {
-    if (ev.data) {
-        if (ev.data != '{"zup": "bro?"}') throw new Error("test failed");
-    } else {
-        console.log("test succeeds");
-    }
+httpserver.setCallback(function(ev) {
+    if (!ev.Data || ev.Data != '{"zup": "bro?"}')
+        throw new Error("test failed" + ev.Data);
+    else
+        console.log("test succeeds: ", ev.Data);
 });
-
-function respond(request) {
-  request.respond(
-    200, {
-      'Content-Type': 'application/json'
-    },
-    '{"zup": "bro?"}' //body
-  );
-
-  fauxJax.restore();
-}
-
-fauxJax.on('request', respond);
 
 handle_char(JSON.stringify({New:true,Data:btoa("GET http://ip.tyk.nu HTTP/1.0\r\n\r\n")})+"\n");
 </script>
