@@ -48,9 +48,7 @@
 <script src="build.js"></script>
 <script>
 "use strict";
-var work = require('webworkify');
-
-var w = work(require('http-server'));
+var h = require('http-server');
 
 window.onload = function()
 {
@@ -119,14 +117,12 @@ emulator.add_listener("serial0-output-char", function(char) {
         console.log("post req");
         var parsed = JSON.parse(buf); //parse with \n but it parses anyway...
         buf = "";
-        w.postMessage(parsed);
+        h.postMessage(parsed);
     }
 });
 
-w.addEventListener('message', function (ev) {
-    if (ev.data) {
-        emulator.serial0_send(JSON.stringify(ev.data) + "\n");
-    }
+h.setCallback(function (ev) {
+        emulator.serial0_send(JSON.stringify(ev) + "\n");
 });
 };
 document.getElementById("file").onfocus = function(evt) {
@@ -144,6 +140,7 @@ document.getElementById("file").onchange = function(evt) {
         reader.readAsArrayBuffer(f);
 	})(f);
     }
+    document.forms[0].reset();
 };
 
 }
@@ -151,7 +148,9 @@ document.getElementById("file").onchange = function(evt) {
 <button id="pause">pause</button>
 <button id="setup">set up proxy</button>
 <button id="send">send over serial port</button>
+<form>
 <input type="file" id="file" multiple />
+</form>
 
 <!-- A minimal structure for the ScreenAdapter defined in browser/screen.js -->
 <div id="screen_container">

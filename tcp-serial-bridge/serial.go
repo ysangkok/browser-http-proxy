@@ -1,5 +1,6 @@
 package main
 import (
+ "io"
  "bufio"
  "net"
  "log"
@@ -8,11 +9,6 @@ import (
  "encoding/base64"
  "os"
 )
-
-//func handler(w http.ResponseWriter, req *http.Request) {
-//	w.Header().Set("Content-Type", "text/plain")
-//	w.Write([]byte("This is an example server.\n"))
-//}
 
 func main() {
 
@@ -34,44 +30,35 @@ if err != nil {
 // Make sure to close it later.
 defer port.Close()
 
-// s, err := json.Marshal("GET /loldongs1 HTTP/1.0\r\n\r\n")
-//
-// // Write 4 bytes to the port.
-// b := append([]byte(s), 0x0a)
-// n, err := port.Write(b)
-// if err != nil {
-//   log.Fatalf("port.Write: %v", err)
-// }
-//
-// log.Println("Wrote", n, "bytes.")
-
-
-//log.Fatal(http.ListenAndServe(":8080", http.HandlerFunc(handler)))
-
-ln, err := net.Listen("tcp", ":8080")
+ln, err := net.Listen("tcp", ":8083")
 if err != nil {
 	log.Fatalf("net.Listen: %v", err);
 }
 
 serialReader := bufio.NewReader(port)
 
-outer: for {
+for {
 	conn, err := ln.Accept()
 	if err != nil {
 		log.Fatalf("net.Listen: %v", err);
 	}
+        handleSingle(conn, serialReader, port)
+}
+
+}
+
+func handleSingle(conn net.Conn, serialReader *bufio.Reader, port io.ReadWriteCloser) {
 	b := bufio.NewReader(conn)
-	go serialToTCP(conn, serialReader)
+	cs := make(chan struct{})
+	go serialToTCP(conn, serialReader, cs)
 	new := true
 	for {
 		line, err := b.ReadBytes('\n')
 		if err != nil {
-			log.Printf("ReadBytes failed! %v", err)
+			log.Printf("ReadBytes failed: %v", err)
 			conn.Close()
-			continue outer
+			return
 		}
-		// bytes.Equal(line, []byte("\r\n")) // http line empty
-		// req done
 		m := ReqMesg{new, base64.StdEncoding.EncodeToString(line)}
 		encoded, err := json.Marshal(m)
 		if err != nil {
@@ -81,11 +68,10 @@ outer: for {
 		port.Write([]byte{'\n'})
 		new = false
 	}
+	<-cs;
 }
 
-}
-
-func serialToTCP(conn net.Conn, serialReader *bufio.Reader) {
+func serialToTCP(conn net.Conn, serialReader *bufio.Reader, cs chan struct{}) {
 	for {
 		var resp RespMesg;
 		str, err := serialReader.ReadBytes('\n')
@@ -98,12 +84,14 @@ func serialToTCP(conn net.Conn, serialReader *bufio.Reader) {
 		}
 		written, err := conn.Write([]byte(resp.Data))
 		if err != nil {
-			log.Printf("conn.Write failed, only wrote %v! %v", written, err)
-			// TODO read until Done
+			log.Printf("conn.Write failed, but wrote %v bytes: %v", written, err)
+			break;
 		}
 		if (resp.Done) {
 			conn.Close()
-			log.Printf("reply completely sent...")
+			log.Printf("Done bit set, reply completely sent...")
+			cs <- struct{}{};
+			break
 		}
 	}
 }

@@ -9,8 +9,8 @@ Get started
 4. `chmod +x /tcp-serial-bridge`
 5. `ifconfig lo up`
 6. push `set up proxy` above the emulator
-6. `/tcp-serial-bridge /dev/ttyS0 8080`
-7. `curl --proxy 127.0.0.1 8080 ip.tyk.nu`
+6. `/tcp-serial-bridge /dev/ttyS0 &`
+7. `curl --proxy 127.0.0.1:8083 ip.tyk.nu`
 
 Files overview
 ---
